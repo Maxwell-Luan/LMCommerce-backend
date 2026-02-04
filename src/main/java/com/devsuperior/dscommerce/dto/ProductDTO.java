@@ -11,10 +11,6 @@ private Long id;
 	private Double price;
 	private String imgUrl;
 
-	public ProductDTO() {
-		
-	}
-
 	public ProductDTO(Long id, String name, String description, Double price, String imgUrl) {
 		this.id = id;
 		this.name = name;
