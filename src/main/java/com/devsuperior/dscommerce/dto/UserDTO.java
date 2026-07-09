@@ -17,6 +17,15 @@ public class UserDTO {
 	private LocalDate birthDate;
 	private List<String> roles = new ArrayList<>();
 	
+	public UserDTO(Long id, String name, String email, String phone, LocalDate birthDate, List<String> roles) {
+		this.id = id;
+		this.name = name;
+		this.email = email;
+		this.phone = phone;
+		this.birthDate = birthDate;
+		this.roles = roles;
+	}
+
 	public UserDTO(User entity) {
 		this.id = entity.getId();
 		this.name = entity.getName();
