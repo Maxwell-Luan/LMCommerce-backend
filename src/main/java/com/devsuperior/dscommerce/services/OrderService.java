@@ -22,19 +22,24 @@ public class OrderService {
 
 	@Autowired
 	private OrderRepository repository;
-	
+
 	@Autowired
 	private ProductRepository productRepository;
-	
+
 	@Autowired
 	private OrderItemRepository orderItemRepository;
-	
+
 	@Autowired
 	private UserService userService;
 
+	@Autowired
+	private AuthService authService;
+
 	@Transactional(readOnly = true)
 	public OrderDTO findById(Long id) {
-		Order order = repository.findById(id).orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
+		Order order = repository.findById(id)
+				.orElseThrow(() -> new ResourceNotFoundException("Recurso não encontrado"));
+		authService.validateSelfOrAdmin(order.getClient().getId());
 		OrderDTO dto = new OrderDTO(order);
 		return dto;
 	}
@@ -44,20 +49,18 @@ public class OrderService {
 		Order order = new Order();
 		order.setMoment(Instant.now());
 		order.setStatus(OrderStatus.WAITING_PAYMENT);
-		
+
 		User user = userService.authenticated();
 		order.setClient(user);
-		
-		dto.getItems()
-			.stream()
-			.map(itemDto -> {
-	        Product product = productRepository.getReferenceById(itemDto.getProductId());
-	        return new OrderItem(order, product, itemDto.getQuantity(), product.getPrice());
-	    }).forEach(item -> order.getItems().add(item));
-		
+
+		dto.getItems().stream().map(itemDto -> {
+			Product product = productRepository.getReferenceById(itemDto.getProductId());
+			return new OrderItem(order, product, itemDto.getQuantity(), product.getPrice());
+		}).forEach(item -> order.getItems().add(item));
+
 		repository.save(order);
 		orderItemRepository.saveAll(order.getItems());
-		
+
 		return new OrderDTO(order);
 	}
 }
